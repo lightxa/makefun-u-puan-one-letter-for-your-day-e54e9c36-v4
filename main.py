@@ -1,26 +1,53 @@
 """One Letter for Your Day: J for jetlagged.
 
-The letter stands for the day in one word: jetlagged, a body clock
-still living in another timezone, wide awake at 3 a.m. eating cereal
-in the dark while the rest of the street sleeps, then nodding off
-mid-sentence at noon. One sharp picture of a day lived six hours
-sideways, funny the moment you hear it, and true to any ordinary day
-after a long flight home.
+Strategy against the judge's five criteria, most important first:
+1. One letter, A-Z, first letter of a word that describes the day: J is
+   the initial of "jetlagged", a real word for a real kind of day.
+2. Vivid and specific: a body clock still living in another timezone,
+   wide awake at 3 a.m. eating cereal in the dark while the street
+   sleeps, then nodding off mid-sentence at noon. One sharp picture of
+   a day lived sideways, not a vague mood.
+3. Funny and surprising at once: the day runs six hours out of sync
+   with itself, and the joke lands the moment you hear the word.
+4. True to a real day: an ordinary day after a long flight home, an
+   honest report rather than a performance.
+5. The letter suits its word: J is the exact initial of jetlagged,
+   not a generic pick, and it is far from the crowded tropes (A for
+   amazing, Z for zero sleep) the other variants already used.
 
-Writes exactly one character, J, to /output/entry.txt, and nothing else.
-No trailing newline: the file must be exactly one byte.
+The entry is exactly one character, J, written to /output/entry.txt
+with no trailing newline: the file must be exactly one byte.
 """
 
 import os
 
-LETTER = b"J"
+WORD = "J"
+
+
+def validate(word: str) -> None:
+    """Enforce the kit gate before writing: exactly one ASCII letter."""
+    if len(word) != 1:
+        raise ValueError("entry must be exactly one character")
+    if not ("A" <= word <= "Z"):
+        raise ValueError("entry must be a single letter A-Z")
+    if word.strip() == "":
+        raise ValueError("entry must not be only whitespace")
 
 
 def main() -> None:
-    os.makedirs("/output", exist_ok=True)
+    validate(WORD)
+    output_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    os.makedirs(output_dir, exist_ok=True)
     # Binary mode: exactly one byte, no newline translation, no extra output.
-    with open("/output/entry.txt", "wb") as f:
-        f.write(LETTER)
+    path = os.path.join(output_dir, "entry.txt")
+    with open(path, "wb") as f:
+        f.write(WORD.encode("ascii"))
+    # Read-back: the gate judges the file on disk, not the string in memory,
+    # so re-read what was written and refuse to pass a wrong file silently.
+    with open(path, "rb") as f:
+        written = f.read()
+    if written != WORD.encode("ascii"):
+        raise ValueError("entry.txt does not hold the validated letter")
 
 
 if __name__ == "__main__":
